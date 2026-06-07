@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T-kun's Dinosaur English — 恐竜英語図鑑</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;700;900&family=Crimson+Pro:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #0A0C0F;
+  --surface: #111418;
+  --card:    #161B22;
+  --border:  #21262D;
+  --gold:    #F0A500;
+  --amber:   #FF6B35;
+  --green:   #39D353;
+  --blue:    #58A6FF;
+  --purple:  #BC8CFF;
+  --text:    #E6EDF3;
+  --muted:   #7D8590;
+  --red:     #FF7B72;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── 背景テクスチャ ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse at 15% 20%, rgba(240,165,0,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 80%, rgba(88,166,255,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(188,140,255,0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── ヘッダー ── */
+header {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 60px 24px 48px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(240,165,0,0.08) 0%, transparent 100%);
+}
+
+.header-eyebrow {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 6px;
+  color: var(--gold);
+  margin-bottom: 16px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.1s;
+}
+
+.header-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(52px, 10vw, 96px);
+  line-height: 0.95;
+  color: var(--text);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.2s;
+}
+
+.header-title span {
+  color: var(--gold);
+  display: block;
+}
+
+.header-subtitle {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  font-size: 20px;
+  color: var(--muted);
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.3s;
+}
+
+.header-stats {
+  display: inline-flex;
+  gap: 32px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 12px 32px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.4s;
+}
+
+.stat { text-align: center; }
+.stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  color: var(--gold);
+  display: block;
+  line-height: 1;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+/* ── 検索バー ── */
+.search-wrap {
+  position: relative;
+  z-index: 10;
+  max-width: 500px;
+  margin: 32px auto 0;
+  padding: 0 24px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.5s;
+}
+
+.search-input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 12px 24px 12px 48px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: 'Noto Sans JP', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--gold); }
+.search-input::placeholder { color: var(--muted); }
+
+.search-icon {
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 18px;
+  pointer-events: none;
+}
+
+/* ── フィルターバー ── */
+.filter-bar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  padding: 24px 24px 0;
+  max-width: 900px;
+  margin: 0 auto;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.6s;
+}
+
+.filter-btn {
+  padding: 6px 16px;
+  border-radius: 50px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+.filter-btn.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #000;
+  font-weight: 700;
+}
+
+/* ── グリッド ── */
+.grid-wrap {
+  position: relative;
+  z-index: 10;
+  max-width: 1200px;
+  margin: 32px auto 0;
+  padding: 0 24px 80px;
+}
+
+.count-label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+/* ── カード ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  opacity: 0;
+  animation: fadeUp 0.5s ease forwards;
+}
+.card:hover {
+  transform: translateY(-4px);
+  border-color: var(--gold);
+  box-shadow: 0 8px 32px rgba(240,165,0,0.15);
+}
+
+.card-rank {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  padding: 10px 14px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rank-num {
+  font-size: 28px;
+  line-height: 1;
+  color: var(--gold);
+}
+
+.rank-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 50px;
+  letter-spacing: 1px;
+}
+
+/* カテゴリ色 */
+.cat-theropod    { background: rgba(255,107,53,0.2);  color: var(--amber);  }
+.cat-sauropod    { background: rgba(57,211,83,0.2);   color: var(--green);  }
+.cat-ceratopsian { background: rgba(188,140,255,0.2); color: var(--purple); }
+.cat-ankylosaur  { background: rgba(88,166,255,0.2);  color: var(--blue);   }
+.cat-stegosaur   { background: rgba(88,166,255,0.2);  color: var(--blue);   }
+.cat-ornithopod  { background: rgba(57,211,83,0.2);   color: var(--green);  }
+.cat-pterosaur   { background: rgba(240,165,0,0.2);   color: var(--gold);   }
+.cat-plesiosaur  { background: rgba(88,166,255,0.2);  color: var(--blue);   }
+.cat-mosasaur    { background: rgba(88,166,255,0.2);  color: var(--blue);   }
+.cat-marine      { background: rgba(88,166,255,0.2);  color: var(--blue);   }
+.cat-other       { background: rgba(125,133,144,0.2); color: var(--muted);  }
+
+.card-name-en {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: var(--text);
+  padding: 0 14px 2px;
+  line-height: 1.1;
+}
+
+.card-name-jp {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 0 14px 12px;
+}
+
+.card-footer {
+  border-top: 1px solid var(--border);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.card-period {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+}
+
+.card-arrow {
+  color: var(--gold);
+  font-size: 14px;
+  transition: transform 0.2s;
+}
+.card:hover .card-arrow { transform: translateX(4px); }
+
+/* ── アニメーション ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── フッター ── */
+footer {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── no results ── */
+.no-results {
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--muted);
+  display: none;
+}
+.no-results-icon { font-size: 48px; margin-bottom: 16px; }
+
+@media (max-width: 600px) {
+  .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .header-stats { gap: 20px; padding: 10px 20px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">T-KUN'S DINOSAUR ENGLISH LESSONS</div>
+  <div class="header-title">
+    恐竜<span>英語図鑑</span>
+  </div>
+  <div class="header-subtitle">Dinosaur Encyclopedia — Popularity Ranking Top 50</div>
+  <div class="header-stats">
+    <div class="stat"><span class="stat-num">50</span><span class="stat-label">種類</span></div>
+    <div class="stat"><span class="stat-num">85</span><span class="stat-label">英単語</span></div>
+    <div class="stat"><span class="stat-num">400</span><span class="stat-label">例文</span></div>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="search" type="text" placeholder="恐竜の名前で検索… (例: rex, トリケラ)">
+  </div>
+  <div class="filter-bar" id="filterBar"></div>
+</header>
+
+<div class="grid-wrap">
+  <div class="count-label" id="countLabel">50種類の恐竜</div>
+  <div class="grid" id="grid"></div>
+  <div class="no-results" id="noResults">
+    <div class="no-results-icon">🦕</div>
+    <div>その恐竜は見つかりませんでした</div>
+  </div>
+</div>
+
+<footer>
+  Dinosaur English Lessons for T-kun &nbsp;●&nbsp; Sei Green &nbsp;●&nbsp; mrgreen7491.github.io/dinosaur-english
+</footer>
+
+<script>
+const dinos = [
+  { rank:1,  en:"Tyrannosaurus rex", jp:"ティラノサウルス・レックス", file:"01_trex_with_photo.html",   cat:"theropod",    period:"白亜紀" },
+  { rank:2,  en:"Spinosaurus",       jp:"スピノサウルス",             file:"02_spino_with_photo.html",  cat:"theropod",    period:"白亜紀" },
+  { rank:3,  en:"Triceratops",       jp:"トリケラトプス",             file:"03_tri_with_photo.html",    cat:"ceratopsian", period:"白亜紀" },
+  { rank:4,  en:"Pteranodon",        jp:"プテラノドン",               file:"04_ptera_with_photo.html",  cat:"pterosaur",   period:"白亜紀" },
+  { rank:5,  en:"Velociraptor",      jp:"ヴェロキラプトル",           file:"05_velo_with_photo.html",   cat:"theropod",    period:"白亜紀" },
+  { rank:6,  en:"Aucasaurus",        jp:"アウカサウルス",             file:"06_auca_with_photo.html",   cat:"theropod",    period:"白亜紀" },
+  { rank:7,  en:"Argentinosaurus",   jp:"アルゼンチノサウルス",       file:"07_argen_with_photo.html",  cat:"sauropod",    period:"白亜紀" },
+  { rank:8,  en:"Giganotosaurus",    jp:"ギガノトサウルス",           file:"08_giga_with_photo.html",   cat:"theropod",    period:"白亜紀" },
+  { rank:9,  en:"Liopleurodon",      jp:"リオプレウロドン",           file:"09_lio_with_photo.html",    cat:"plesiosaur",  period:"ジュラ紀" },
+  { rank:10, en:"Brachiosaurus",     jp:"ブラキオサウルス",           file:"10_brachi_with_photo.html", cat:"sauropod",    period:"ジュラ紀" },
+  { rank:11, en:"Iguanodon",         jp:"イグアノドン",               file:"11_igua_with_photo.html",   cat:"ornithopod",  period:"白亜紀" },
+  { rank:12, en:"Allosaurus",        jp:"アロサウルス",               file:"12_allo_with_photo.html",   cat:"theropod",    period:"ジュラ紀" },
+  { rank:13, en:"Stegosaurus",       jp:"ステゴサウルス",             file:"13_stego_with_photo.html",  cat:"stegosaur",   period:"ジュラ紀" },
+  { rank:14, en:"Quetzalcoatlus",    jp:"ケツァルコアトルス",         file:"14_quetz_with_photo.html",  cat:"pterosaur",   period:"白亜紀" },
+  { rank:15, en:"Plesiosaurus",      jp:"プレシオサウルス",           file:"15_plesi_with_photo.html",  cat:"plesiosaur",  period:"ジュラ紀" },
+  { rank:16, en:"Tarbosaurus",       jp:"タルボサウルス",             file:"16_tarbo_with_photo.html",  cat:"theropod",    period:"白亜紀" },
+  { rank:17, en:"Nothosaurus",       jp:"ノトサウルス",               file:"17_notho_with_photo.html",  cat:"marine",      period:"トリアス紀" },
+  { rank:18, en:"Dakosaurus",        jp:"ダコサウルス",               file:"18_dako_with_photo.html",   cat:"marine",      period:"ジュラ紀" },
+  { rank:19, en:"Ankylosaurus",      jp:"アンキロサウルス",           file:"19_anky_with_photo.html",   cat:"ankylosaur",  period:"白亜紀" },
+  { rank:20, en:"Pachycephalosaurus",jp:"パキケファロサウルス",       file:"20_pachy_with_photo.html",  cat:"other",       period:"白亜紀" },
+  { rank:21, en:"Mosasaurus",        jp:"モササウルス",               file:"21_mosa_with_photo.html",   cat:"mosasaur",    period:"白亜紀" },
+  { rank:22, en:"Ichthyosaurus",     jp:"イクチオサウルス",           file:"22_ichthy_with_photo.html", cat:"marine",      period:"ジュラ紀" },
+  { rank:23, en:"Tylosaurus",        jp:"ティロサウルス",             file:"23_tylo_with_photo.html",   cat:"mosasaur",    period:"白亜紀" },
+  { rank:24, en:"Utahraptor",        jp:"ユタラプトル",               file:"24_utah_with_photo.html",   cat:"theropod",    period:"白亜紀" },
+  { rank:25, en:"Deinonychus",       jp:"デイノニクス",               file:"25_deino_with_photo.html",  cat:"theropod",    period:"白亜紀" },
+  { rank:26, en:"Diplodocus",        jp:"ディプロドクス",             file:"26_diplo_with_photo.html",  cat:"sauropod",    period:"ジュラ紀" },
+  { rank:27, en:"Elasmosaurus",      jp:"エラスモサウルス",           file:"27_elasmo_with_photo.html", cat:"plesiosaur",  period:"白亜紀" },
+  { rank:28, en:"Acrocanthosaurus",  jp:"アクロカントサウルス",       file:"28_acro_with_photo.html",   cat:"theropod",    period:"白亜紀" },
+  { rank:29, en:"Carnotaurus",       jp:"カルノタウルス",             file:"29_carno_with_photo.html",  cat:"theropod",    period:"白亜紀" },
+  { rank:30, en:"Kronosaurus",       jp:"クロノサウルス",             file:"30_krono_with_photo.html",  cat:"plesiosaur",  period:"白亜紀" },
+  { rank:31, en:"Cymbospondylus",    jp:"キンボスポンディルス",       file:"31_cymbo_with_photo.html",  cat:"marine",      period:"トリアス紀" },
+  { rank:32, en:"Agustinia",         jp:"アグスティニア",             file:"32_agus_with_photo.html",   cat:"sauropod",    period:"白亜紀" },
+  { rank:33, en:"Pterodactylus",     jp:"プテロダクティルス",         file:"33_ptero_with_photo.html",  cat:"pterosaur",   period:"ジュラ紀" },
+  { rank:34, en:"Apatosaurus",       jp:"アパトサウルス",             file:"34_apato_with_photo.html",  cat:"sauropod",    period:"ジュラ紀" },
+  { rank:35, en:"Dimorphodon",       jp:"ディモルフォドン",           file:"35_dimo_with_photo.html",   cat:"pterosaur",   period:"ジュラ紀" },
+  { rank:36, en:"Shonisaurus",       jp:"ショニサウルス",             file:"36_shoni_with_photo.html",  cat:"marine",      period:"トリアス紀" },
+  { rank:37, en:"Parasaurolophus",   jp:"パラサウロロフス",           file:"37_para_with_photo.html",   cat:"ornithopod",  period:"白亜紀" },
+  { rank:38, en:"Rhamphorhynchus",   jp:"ランフォリンクス",           file:"38_rhamph_with_photo.html", cat:"pterosaur",   period:"ジュラ紀" },
+  { rank:39, en:"Anhanguera",        jp:"アンハングエラ",             file:"39_anhan_with_photo.html",  cat:"pterosaur",   period:"白亜紀" },
+  { rank:40, en:"Eudimorphodon",     jp:"エウディモルフォドン",       file:"40_eudi_with_photo.html",   cat:"pterosaur",   period:"トリアス紀" },
+  { rank:41, en:"Leedsichthys",      jp:"リードシクティス",           file:"41_leeds_with_photo.html",  cat:"other",       period:"ジュラ紀" },
+  { rank:42, en:"Puertasaurus",      jp:"プエルタサウルス",           file:"42_puerta_with_photo.html", cat:"sauropod",    period:"白亜紀" },
+  { rank:43, en:"Megalosaurus",      jp:"メガロサウルス",             file:"43_mega_with_photo.html",   cat:"theropod",    period:"ジュラ紀" },
+  { rank:44, en:"Plateosaurus",      jp:"プラテオサウルス",           file:"44_plate_with_photo.html",  cat:"sauropod",    period:"トリアス紀" },
+  { rank:45, en:"Microraptor",       jp:"ミクロラプトル",             file:"45_micro_with_photo.html",  cat:"theropod",    period:"白亜紀" },
+  { rank:46, en:"Dolichorhynchops",  jp:"ドリコリンコプス",           file:"46_doli_with_photo.html",   cat:"plesiosaur",  period:"白亜紀" },
+  { rank:47, en:"Albertosaurus",     jp:"アルバートサウルス",         file:"47_alber_with_photo.html",  cat:"theropod",    period:"白亜紀" },
+  { rank:48, en:"Stenopterygius",    jp:"ステノプテリギウス",         file:"48_steno_with_photo.html",  cat:"marine",      period:"ジュラ紀" },
+  { rank:49, en:"Achelousaurus",     jp:"アケロウサウルス",           file:"49_achel_with_photo.html",  cat:"ceratopsian", period:"白亜紀" },
+  { rank:50, en:"Compsognathus",     jp:"コンプソグナトゥス",         file:"50_comps_with_photo.html",  cat:"theropod",    period:"ジュラ紀" },
+];
+
+const catLabels = {
+  theropod:    { label:"獣脚類",    en:"Theropod" },
+  sauropod:    { label:"竜脚類",    en:"Sauropod" },
+  ceratopsian: { label:"角竜類",    en:"Ceratopsian" },
+  ankylosaur:  { label:"鎧竜類",    en:"Ankylosaur" },
+  stegosaur:   { label:"剣竜類",    en:"Stegosaur" },
+  ornithopod:  { label:"鳥脚類",    en:"Ornithopod" },
+  pterosaur:   { label:"翼竜",      en:"Pterosaur" },
+  plesiosaur:  { label:"首長竜",    en:"Plesiosaur" },
+  mosasaur:    { label:"モササウルス類", en:"Mosasaur" },
+  marine:      { label:"海生爬虫類", en:"Marine reptile" },
+  other:       { label:"その他",    en:"Other" },
+};
+
+// フィルターボタン生成
+const cats = ['all', ...Object.keys(catLabels)];
+const filterBar = document.getElementById('filterBar');
+let activeFilter = 'all';
+
+cats.forEach(cat => {
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn' + (cat === 'all' ? ' active' : '');
+  btn.textContent = cat === 'all' ? 'すべて' : `${catLabels[cat].label}`;
+  btn.dataset.cat = cat;
+  btn.addEventListener('click', () => {
+    activeFilter = cat;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  });
+  filterBar.appendChild(btn);
+});
+
+// カード生成
+function makeCard(d, delay) {
+  const a = document.createElement('a');
+  a.href = d.file;
+  a.className = 'card';
+  a.style.animationDelay = `${delay}ms`;
+
+  const catClass = `cat-${d.cat}`;
+  const catInfo = catLabels[d.cat] || { label:'その他', en:'Other' };
+
+  a.innerHTML = `
+    <div class="card-rank">
+      <span class="rank-num">${String(d.rank).padStart(2,'0')}</span>
+      <span class="rank-badge ${catClass}">${catInfo.label}</span>
+    </div>
+    <div class="card-name-en">${d.en}</div>
+    <div class="card-name-jp">${d.jp}</div>
+    <div class="card-footer">
+      <span class="card-period">${d.period}</span>
+      <span class="card-arrow">→</span>
+    </div>
+  `;
+  return a;
+}
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const grid = document.getElementById('grid');
+  const noResults = document.getElementById('noResults');
+  const countLabel = document.getElementById('countLabel');
+
+  grid.innerHTML = '';
+
+  const filtered = dinos.filter(d => {
+    const matchCat = activeFilter === 'all' || d.cat === activeFilter;
+    const matchQ = !q ||
+      d.en.toLowerCase().includes(q) ||
+      d.jp.includes(q) ||
+      d.period.includes(q);
+    return matchCat && matchQ;
+  });
+
+  if (filtered.length === 0) {
+    noResults.style.display = 'block';
+    countLabel.textContent = '0種類';
+  } else {
+    noResults.style.display = 'none';
+    countLabel.textContent = `${filtered.length}種類の恐竜`;
+    filtered.forEach((d, i) => {
+      grid.appendChild(makeCard(d, i * 30));
+    });
+  }
+}
+
+document.getElementById('search').addEventListener('input', render);
+render();
+</script>
+</body>
+</html>
